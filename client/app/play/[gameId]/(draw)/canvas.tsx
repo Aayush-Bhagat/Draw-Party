@@ -1,8 +1,8 @@
-import { useRef } from "react"
+import { useState } from "react"
 import useDraw, {Draw} from "./useDraw"
 
 export default function Canvas() {
-  const {canvasRef} = useDraw(draw)
+  const {canvasRef, onMouseDown, clear, undo} = useDraw(draw)
 
   function draw({ctx, curPoint, prevPoint}: Draw){
     const {x: curX, y: curY} = curPoint
@@ -12,21 +12,24 @@ export default function Canvas() {
 
     let startPoint = prevPoint ?? curPoint
 
-    ctx.beginPath()
+    const path = new Path2D()
     ctx.lineWidth = lineWidth
     ctx.strokeStyle = lineColor
-    ctx.moveTo(startPoint.x, startPoint.y)
-    ctx.lineTo(curX, curY)
-    ctx.stroke()
+    path.moveTo(startPoint.x, startPoint.y)
+    path.lineTo(curX, curY)
+    ctx.stroke(path)
 
     ctx.fillStyle = lineColor
     ctx.beginPath()
-    ctx.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI)
-    ctx.fill()
+    path.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI)
+    path.quadraticCurveTo(startPoint.x, startPoint.y, curX, curY)
+    ctx.fill(path)
   }
   return (
     <div className="w-screen h-screen bg-white flex justify-center items-center"> 
-      <canvas ref={canvasRef} width={750} height={750} className="border-2 border-black rounded-md"/>
+      <button onClick={undo} className=" border-2 border-black rounded-md  p-2">Undo</button>
+      <button onClick={clear} className=" border-2 border-black rounded-md  p-2">Clear Canvas</button>
+      <canvas onMouseDown={onMouseDown} ref={canvasRef} width={750} height={750} className="border-2 border-black rounded-md"/>
     </div>
   )
 }
