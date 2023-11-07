@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, MutableRefObject } from "react"
 
 export interface Draw{
   ctx: CanvasRenderingContext2D
@@ -11,9 +11,9 @@ type Point = {
   y: number
 }
 
-export default function useDraw(onDraw: ({ctx, curPoint, prevPoint}: Draw) => void){
+export default function useDraw(onDraw: ({ ctx, curPoint, prevPoint }: Draw) => void, canvasRef: MutableRefObject<HTMLCanvasElement | null> ){
   const [isMouseDown, setIsMouseDown] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const [drawHistory, setDrawHistory] = useState<ImageData[]>([])
   const prevPoint = useRef<null | Point>(null)
 
 
@@ -38,10 +38,24 @@ export default function useDraw(onDraw: ({ctx, curPoint, prevPoint}: Draw) => vo
     const ctx = canvas.getContext("2d")
 
     if (!ctx) return
-    ctx.restore()
+    if (drawHistory.length === 0) return;
+    if (drawHistory.length  === 1){
+      setDrawHistory([])
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const lastState = drawHistory[drawHistory.length-2]
+    setDrawHistory((history) => history.filter((_, i) => i !== history.length - 2))
+    if (lastState === undefined) return
+    ctx.putImageData(lastState, 0,0)
   }
 
   useEffect(()=>{
+    console.log(drawHistory)
+  }, [drawHistory])
+
+  useEffect(()=>{
+    console.log(drawHistory)
     const mouseMoveHandler = (e: MouseEvent) =>{
       if (!isMouseDown) return;
 
@@ -52,7 +66,6 @@ export default function useDraw(onDraw: ({ctx, curPoint, prevPoint}: Draw) => vo
       if(!ctx || !curCoords) return
 
       onDraw({ctx, curPoint: curCoords, prevPoint: prevPoint.current})
-      ctx.save()
       prevPoint.current = curCoords
 
     }
@@ -73,8 +86,22 @@ export default function useDraw(onDraw: ({ctx, curPoint, prevPoint}: Draw) => vo
     canvasRef?.current?.addEventListener("mousemove", mouseMoveHandler)
 
     const mouseUpHandler = ()=>{
-      setIsMouseDown(false)
-      prevPoint.current = null
+      if(isMouseDown === true){
+        setIsMouseDown(false)
+        prevPoint.current = null
+
+        const canvas = canvasRef.current
+
+        if (!canvas) {
+          return
+        }
+
+        const ctx = canvas.getContext("2d")
+
+        if (!ctx) return
+
+        setDrawHistory((drawHistory)=> [...drawHistory, ctx.getImageData(0, 0, canvas.width, canvas.height)])
+      }
     }
 
     window.addEventListener("mouseup", mouseUpHandler)
@@ -84,7 +111,7 @@ export default function useDraw(onDraw: ({ctx, curPoint, prevPoint}: Draw) => vo
       canvasRef.current?.removeEventListener("mousemove", mouseMoveHandler)
       window.removeEventListener("mouseup", mouseUpHandler)
     } 
-  }, [onDraw, isMouseDown])
+  }, [onDraw, isMouseDown, canvasRef, drawHistory])
 
-  return { canvasRef, onMouseDown, clear, undo }
+  return { onMouseDown, clear, undo }
 }

@@ -1,8 +1,9 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import useDraw, {Draw} from "./useDraw"
 
 export default function Canvas() {
-  const {canvasRef, onMouseDown, clear, undo} = useDraw(draw)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const {onMouseDown, clear, undo} = useDraw(draw, canvasRef)
 
   function draw({ctx, curPoint, prevPoint}: Draw){
     const {x: curX, y: curY} = curPoint
@@ -24,6 +25,7 @@ export default function Canvas() {
     path.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI)
     path.quadraticCurveTo(startPoint.x, startPoint.y, curX, curY)
     ctx.fill(path)
+    path.closePath()
   }
   return (
     <div className="w-screen h-screen bg-white flex justify-center items-center"> 
