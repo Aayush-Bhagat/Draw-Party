@@ -1,23 +1,14 @@
-import "../styles/globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+
+import '../styles/globals.css'
 
 export default function RootLayout({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode
 }) {
-	return (
-		<html lang="en">
-			<body>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="system"
-					enableSystem
-					disableTransitionOnChange
-				>
-					{children}
-				</ThemeProvider>
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
 }

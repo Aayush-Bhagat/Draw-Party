@@ -1,48 +1,21 @@
-"use client";
+"use client"
 
-import GameBoard from "./(game)/game";
-import JoinGame from "./(game)/joinGame";
-import { useReducer, useState } from "react";
-import { User } from "@/types";
-import {
-	gameStateReducer,
-	GameStateAction,
-	initializeGameState,
-} from "@/lib/gameStateReducer";
+import Canvas from "./(draw)/canvas"
 
-type Props = {
-	params: {
-		gameId: string;
-	};
-};
+interface params {
+  params:{
+    gameId: string
+  }
+}
 
-export default function GamePage({ params }: Props) {
-	const [isJoined, setIsJoined] = useState(false);
-	const [user, setUser] = useState<User>({ id: "", name: "" });
-	const [gameState, dispatch] = useReducer(
-		gameStateReducer,
-		initializeGameState()
-	);
 
-	const { gameId } = params;
-	if (!isJoined) {
-		return (
-			<JoinGame
-				gameId={gameId}
-				username={user.name}
-				setUser={setUser}
-				setIsJoined={setIsJoined}
-			/>
-		);
-	}
+export default function Game({ params } : params) {
+  const {gameId} = params
 
-	return (
-		<>
-			<GameBoard
-				gameState={gameState}
-				dispatch={dispatch}
-				gameId={gameId}
-			/>
-		</>
-	);
+  return (
+      <div>
+        <h1> Game Id: {gameId} </h1>
+        <Canvas />
+      </div>
+  )
 }
