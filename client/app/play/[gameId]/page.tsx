@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 
 import GameBoard from "./(game)/game";
@@ -46,26 +45,4 @@ export default function GamePage({ params }: Props) {
 			/>
 		</>
 	);
-=======
-"use client"
-
-import Canvas from "./(draw)/canvas"
-
-interface params {
-  params:{
-    gameId: string
-  }
-}
-
-
-export default function Game({ params } : params) {
-  const {gameId} = params
-
-  return (
-      <div>
-        <h1> Game Id: {gameId} </h1>
-        <Canvas />
-      </div>
-  )
->>>>>>> 9046e46 (Basic frontend template)
 }
